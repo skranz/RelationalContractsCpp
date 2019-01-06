@@ -5,55 +5,6 @@
 
 using namespace Rcpp;
 
-// vecLongColMaxs
-NumericVector vecLongColMaxs(NumericVector vec, int nrow);
-RcppExport SEXP _RelationalContractsCpp_vecLongColMaxs(SEXP vecSEXP, SEXP nrowSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type vec(vecSEXP);
-    Rcpp::traits::input_parameter< int >::type nrow(nrowSEXP);
-    rcpp_result_gen = Rcpp::wrap(vecLongColMaxs(vec, nrow));
-    return rcpp_result_gen;
-END_RCPP
-}
-// vecLongRowMaxs
-NumericVector vecLongRowMaxs(NumericVector vec, int nrow);
-RcppExport SEXP _RelationalContractsCpp_vecLongRowMaxs(SEXP vecSEXP, SEXP nrowSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type vec(vecSEXP);
-    Rcpp::traits::input_parameter< int >::type nrow(nrowSEXP);
-    rcpp_result_gen = Rcpp::wrap(vecLongRowMaxs(vec, nrow));
-    return rcpp_result_gen;
-END_RCPP
-}
-// mat_times_vec_rows
-NumericVector mat_times_vec_rows(NumericMatrix mat, NumericVector vec, IntegerVector vec_rows);
-RcppExport SEXP _RelationalContractsCpp_mat_times_vec_rows(SEXP matSEXP, SEXP vecSEXP, SEXP vec_rowsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vec(vecSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type vec_rows(vec_rowsSEXP);
-    rcpp_result_gen = Rcpp::wrap(mat_times_vec_rows(mat, vec, vec_rows));
-    return rcpp_result_gen;
-END_RCPP
-}
-// mat_times_vec
-NumericVector mat_times_vec(NumericMatrix mat, NumericVector vec);
-RcppExport SEXP _RelationalContractsCpp_mat_times_vec(SEXP matSEXP, SEXP vecSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type vec(vecSEXP);
-    rcpp_result_gen = Rcpp::wrap(mat_times_vec(mat, vec));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_capped_rne_find_actions
 IntegerVector cpp_capped_rne_find_actions(double U, double v1, double v2, NumericVector U_hat, NumericVector v1_hat, NumericVector v2_hat, LogicalVector IC_holds, NumericVector next_r1, NumericVector next_r2, NumericMatrix trans_mat, IntegerVector dest_rows, String tie_breaking, double tol);
 RcppExport SEXP _RelationalContractsCpp_cpp_capped_rne_find_actions(SEXP USEXP, SEXP v1SEXP, SEXP v2SEXP, SEXP U_hatSEXP, SEXP v1_hatSEXP, SEXP v2_hatSEXP, SEXP IC_holdsSEXP, SEXP next_r1SEXP, SEXP next_r2SEXP, SEXP trans_matSEXP, SEXP dest_rowsSEXP, SEXP tie_breakingSEXP, SEXP tolSEXP) {
@@ -97,14 +48,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_capped_rne_multistage_iterations
+DataFrame cpp_capped_rne_multistage_iterations(int T, DataFrame sdf, DataFrame rne, List transmats, List static_rep_li, double delta, double rho, double beta1, String tie_breaking, double tol, int debug_row);
+RcppExport SEXP _RelationalContractsCpp_cpp_capped_rne_multistage_iterations(SEXP TSEXP, SEXP sdfSEXP, SEXP rneSEXP, SEXP transmatsSEXP, SEXP static_rep_liSEXP, SEXP deltaSEXP, SEXP rhoSEXP, SEXP beta1SEXP, SEXP tie_breakingSEXP, SEXP tolSEXP, SEXP debug_rowSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type sdf(sdfSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type rne(rneSEXP);
+    Rcpp::traits::input_parameter< List >::type transmats(transmatsSEXP);
+    Rcpp::traits::input_parameter< List >::type static_rep_li(static_rep_liSEXP);
+    Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< double >::type beta1(beta1SEXP);
+    Rcpp::traits::input_parameter< String >::type tie_breaking(tie_breakingSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type debug_row(debug_rowSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_capped_rne_multistage_iterations(T, sdf, rne, transmats, static_rep_li, delta, rho, beta1, tie_breaking, tol, debug_row));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_RelationalContractsCpp_vecLongColMaxs", (DL_FUNC) &_RelationalContractsCpp_vecLongColMaxs, 2},
-    {"_RelationalContractsCpp_vecLongRowMaxs", (DL_FUNC) &_RelationalContractsCpp_vecLongRowMaxs, 2},
-    {"_RelationalContractsCpp_mat_times_vec_rows", (DL_FUNC) &_RelationalContractsCpp_mat_times_vec_rows, 3},
-    {"_RelationalContractsCpp_mat_times_vec", (DL_FUNC) &_RelationalContractsCpp_mat_times_vec, 2},
     {"_RelationalContractsCpp_cpp_capped_rne_find_actions", (DL_FUNC) &_RelationalContractsCpp_cpp_capped_rne_find_actions, 13},
     {"_RelationalContractsCpp_cpp_capped_rne_iterations", (DL_FUNC) &_RelationalContractsCpp_cpp_capped_rne_iterations, 10},
+    {"_RelationalContractsCpp_cpp_capped_rne_multistage_iterations", (DL_FUNC) &_RelationalContractsCpp_cpp_capped_rne_multistage_iterations, 11},
     {NULL, NULL, 0}
 };
 

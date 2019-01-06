@@ -63,35 +63,6 @@ capped_rne_iterations = function(g,T=1,rne=g$rne, tie.breaking="slack", debug_ro
 
 }
 
-capped_multistage_rne_iterations = function(g,T=1,rne=g$rne, tie.breaking="slack", debug_row=-1, tol=1e-12) {
-  restore.point("capped_rne_iterations")
-
-  sdf = g$sdf
-  transmats = lapply(1:NROW(sdf), function(row) {
-    trans.mat = sdf$trans.mat[[row]]
-    if (is.null(trans.mat)) {
-      x = sdf$x[row]; na1 = sdf$na1[row]; na2 = sdf$na2[row]
-      trans.mat = matrix(1,na1*na2,1)
-      colnames(trans.mat) = x
-    }
-    trans.mat
-  })
-
-  new_rne = cpp_capped_multistage_rne_iterations(T, sdf=sdf,rne,transmats,delta=g$param$delta, rho=g$param$rho,beta1 = g$param$beta1,
-    tie_breaking=tie.breaking, tol=tol, debug_row=debug_row)
-
-  new_rne
-
-  return(new_rne)
-
-  trans_mat = transmats[[1]]
-  next_U = rne$U
-  dest_rows = 0
-  mat_times_vec_rows(trans_mat,next_U, dest_rows)
-
-
-}
-
 
 examples.multistage = function() {
   library(RelationalContracts)
@@ -129,13 +100,13 @@ examples.multistage = function() {
   }
 
 
-  x.seq = seq(0,1, by=1)
+  x.seq = seq(0,1, by=0.1)
   #x.seq = c(0,0.01,0.05,0.1,0.2,0.5,1)
   x.df = as_data_frame(expand.grid(x1=x.seq,x2=x.seq, stringsAsFactors = FALSE)) %>%
     mutate(x= paste0(x1," ", x2))
 
   g = rel_game("Slowly Intensifying Repeated Principal-Agent") %>%
-    rel_param(x.seq=x.seq, e.seq=seq(0,0.1,by=0.1)) %>%
+    rel_param(x.seq=x.seq, e.seq=seq(0,0.1,by=0.01)) %>%
     rel_states(x.df,
       # Static effort stage
       static.A.fun=static.A.fun,
@@ -147,62 +118,19 @@ examples.multistage = function() {
     )
 
   g = rel_compile(g)
-  g = rel_capped_rne(g,T=2, adjusted.delta=0.17, rho=0.7,tie.breaking = "random")
-
-  rne = filter(g$rne, t==max(g$rne$t))
-
-  sdf = g$sdf
-
-  transmats = lapply(1:NROW(sdf), function(row) {
-    trans.mat = sdf$trans.mat[[row]]
-    if (is.null(trans.mat)) {
-      x = sdf$x[row]; na1 = sdf$na1[row]; na2 = sdf$na2[row]
-      trans.mat = matrix(1,na1*na2,1)
-      colnames(trans.mat) = x
-    }
-    trans.mat
-  })
-
-  mat = matrix(1:6,2)
-  vec = as.vector(mat)
-  res = vecLongColMaxs(vec,2)
-  matrix(res,2)
-
-  mat
-  res = vecLongRowMaxs(vec,2)
-  matrix(res,2)
-
-  capped_rne_iterations(T=1, sdf,rne,transmats,delta=g$param$delta, rho=g$param$rho,beta1 = g$param$beta1)
+  g = rel_capped_rne(g,T=1, adjusted.delta=0.17, rho=0.7,tie.breaking = "random")
 
 
-  rne.diagram(g,just.eq.chain = TRUE)
+  g$new_rne =rne= capped_rne_multistage_iterations(g,T=100, debug_row=-1, tie.breaking="equal_r")
+
+
+  rne.diagram(g,eq.field = "new_rne",just.eq.chain = TRUE)
   (rne = g$rne)
 }
 
-capped.rne.find.actions = function(U,v1,v2,U.hat,v1.hat,v2.hat, IC.holds, next.r1=NULL, next.r2=NULL, trans.mat=NULL, dest_rows=NULL, tie.breaking=c("slack","random","first","last")[1], tol=1e-12) {
-  restore.point("capped.rne.find.actions")
-  # Pick dynamic equilibrium actions
-  # using the specified tie.breaking rule
-  slack = U.hat - (v1.hat + v2.hat)
-  const = 1
-  if (tie.breaking=="slack") {
-    tb = slack
-  } else if (tie.breaking=="last") {
-    tb = seq_len(NROW(U.hat))
-  } else if (tie.breaking=="first") {
-    tb = rev(seq_len(NROW(U.hat)))
-  } else if (tie.breaking=="equal_r") {
-    next_r_diff = abs(next.r1-next.r2)
-    tb = as.vector(trans.mat %*% next_r_diff[dest_rows])
-    const = min(tb) + max(tb)-min(tb)
-  } else {
-    tb = runif(NROW(U.hat))
-  }
 
-  ae = which.max((const+tb) * (abs(U.hat-U)<tol & IC.holds))
-  a1 = which.max((const+tb) * (abs(v1.hat-v1)<tol & IC.holds))
-  a2 = which.max((const+tb) * (abs(v2.hat-v2)<tol & IC.holds))
-  c(ae,a1,a2)
-}
+
+
+
 
 
