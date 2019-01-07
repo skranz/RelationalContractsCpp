@@ -88,28 +88,25 @@ NumericVector vecLongRowMaxs(NumericVector vec,int nrow) {
   return res;
 }
 
-
+// [[Rcpp::export]]
 NumericVector mat_times_vec_rows(NumericMatrix mat, NumericVector vec, IntegerVector vec_rows) {
   int ncol = mat.ncol();
-  int c = 0;
-  NumericMatrix::Column mcol = mat( _ , c);
-  NumericVector res = mcol *vec[vec_rows[c]];
-
-  for (c=1; c<ncol;c++) {
-    mcol = mat( _ , c);
+  int nrow = mat.nrow();
+  NumericVector res(nrow);
+  for (int c=0; c<ncol;c++) {
+    NumericMatrix::Column mcol = mat( _ , c);
     res += mcol * vec[vec_rows[c]];
   }
   return res;
 }
 
+// [[Rcpp::export]]
 NumericVector mat_times_vec(NumericMatrix mat, NumericVector vec) {
   int ncol = mat.ncol();
-  int c = 0;
-  NumericMatrix::Column mcol = mat( _ , c);
-  NumericVector res = mcol *vec;
-
-  for (c=1; c<ncol;c++) {
-    mcol = mat( _ , c);
+  int nrow = mat.nrow();
+  NumericVector res(nrow);
+  for (int c=0; c<ncol;c++) {
+    NumericMatrix::Column mcol = mat( _ , c);
     res += mcol * vec;
   }
   return res;
@@ -133,7 +130,7 @@ IntegerVector cpp_capped_rne_find_actions(
   if (tie_breaking=="equal_r") {
     NumericVector next_r_diff = -abs(next_r1-next_r2);
     tb = mat_times_vec_rows(trans_mat,next_r_diff,dest_rows);
-    tb_const = min(tb) + max(tb)-min(tb);
+    tb_const = -min(tb) + max(tb)-min(tb);
   } else if (tie_breaking=="random") {
     tb = runif(U_hat.size());
   } else if (tie_breaking=="slack") {
@@ -145,10 +142,10 @@ IntegerVector cpp_capped_rne_find_actions(
     tb = seq(U_hat.size(),0);
   } else if (tie_breaking=="max_r1") {
     tb = mat_times_vec_rows(trans_mat,next_r1,dest_rows);
-    tb_const = min(tb) + max(tb)-min(tb);
+    tb_const = -min(tb) + max(tb)-min(tb);
   } else if (tie_breaking=="max_r2") {
     tb = mat_times_vec_rows(trans_mat,next_r2,dest_rows);
-    tb_const = min(tb) + max(tb)-min(tb);
+    tb_const = -min(tb) + max(tb)-min(tb);
   } else {
     tb = runif(U_hat.size());
   }
