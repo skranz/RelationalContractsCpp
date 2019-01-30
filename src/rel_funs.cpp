@@ -89,9 +89,17 @@ NumericVector vecLongRowMaxs(NumericVector vec,int nrow) {
 }
 
 // [[Rcpp::export]]
-NumericVector mat_times_vec_rows(NumericMatrix mat, NumericVector vec, IntegerVector vec_rows) {
+NumericVector mat_times_vec_rows(NumericMatrix mat, NumericVector vec, IntegerVector vec_rows, int target_nrow) {
   int ncol = mat.ncol();
   int nrow = mat.nrow();
+
+  // Special case: A zero row matrix encodes a terminal state
+  // in which all actions lead back to itself
+  if ( (ncol == 1) & (nrow==0)) {
+    NumericVector res0(target_nrow,vec[vec_rows[0]]);
+    return res0;
+  }
+
   NumericVector res(nrow);
   for (int c=0; c<ncol;c++) {
     NumericMatrix::Column mcol = mat( _ , c);
@@ -101,7 +109,7 @@ NumericVector mat_times_vec_rows(NumericMatrix mat, NumericVector vec, IntegerVe
 }
 
 // [[Rcpp::export]]
-NumericVector mat_times_vec(NumericMatrix mat, NumericVector vec) {
+NumericVector mat_times_vec(NumericMatrix mat, NumericVector vec, int target_nrow=0) {
   int ncol = mat.ncol();
   int nrow = mat.nrow();
   NumericVector res(nrow);
@@ -129,7 +137,7 @@ IntegerVector cpp_capped_rne_find_actions(
   NumericVector tb;
   if (tie_breaking=="equal_r") {
     NumericVector next_r_diff = -abs(next_r1-next_r2);
-    tb = mat_times_vec_rows(trans_mat,next_r_diff,dest_rows);
+    tb = mat_times_vec_rows(trans_mat,next_r_diff,dest_rows, U_hat.size());
     tb_const = -min(tb) + max(tb)-min(tb);
   } else if (tie_breaking=="random") {
     tb = runif(U_hat.size());
@@ -141,10 +149,10 @@ IntegerVector cpp_capped_rne_find_actions(
   } else if (tie_breaking=="first") {
     tb = seq(U_hat.size(),0);
   } else if (tie_breaking=="max_r1") {
-    tb = mat_times_vec_rows(trans_mat,next_r1,dest_rows);
+    tb = mat_times_vec_rows(trans_mat,next_r1,dest_rows,U_hat.size());
     tb_const = -min(tb) + max(tb)-min(tb);
   } else if (tie_breaking=="max_r2") {
-    tb = mat_times_vec_rows(trans_mat,next_r2,dest_rows);
+    tb = mat_times_vec_rows(trans_mat,next_r2,dest_rows,U_hat.size());
     tb_const = -min(tb) + max(tb)-min(tb);
   } else {
     tb = runif(U_hat.size());
@@ -210,9 +218,11 @@ DataFrame cpp_capped_rne_iterations(int T,
       //int na1 = vec_na1[row];
       int na2 = vec_na2[row];
 
+
       NumericMatrix trans_mat = transmats[row];
       NumericVector pi1 = li_pi1[row];
       NumericVector pi2 = li_pi2[row];
+      int na = pi1.size();
 
       StringVector xd = colnames(trans_mat);
 
@@ -227,17 +237,17 @@ DataFrame cpp_capped_rne_iterations(int T,
 
 
       NumericVector U_hat = (1-delta)*(pi1+pi2) +
-        delta* mat_times_vec_rows(trans_mat,next_U, dest_rows);
+        delta* mat_times_vec_rows(trans_mat,next_U, dest_rows,na);
 
 
       //# "q-value" of punishment payoffs
       //q1.hat = (1-delta)*sdf$pi1[[srow]] +
       //  delta * (trans.mat %*% ( (1-rho)*rne$v1[dest.rows] + rho*rne$r1[dest.rows] ))
       NumericVector q1_hat = (1-delta)*pi1 +
-        delta*mat_times_vec_rows(trans_mat,next_v1_r1, dest_rows);
+        delta*mat_times_vec_rows(trans_mat,next_v1_r1, dest_rows,na);
 
       NumericVector q2_hat = (1-delta)*pi2 +
-        delta*mat_times_vec_rows(trans_mat,next_v2_r2, dest_rows);
+        delta*mat_times_vec_rows(trans_mat,next_v2_r2, dest_rows,na);
 
       // # v1.hat is best reply q for player 1
       // # Note player 1 is col player
@@ -260,7 +270,7 @@ DataFrame cpp_capped_rne_iterations(int T,
 
           Named("pi1")=pi1,
           Named("pi2")=pi2,
-          Named("U_cont")=mat_times_vec_rows(trans_mat,next_U, dest_rows),
+          Named("U_cont")=mat_times_vec_rows(trans_mat,next_U, dest_rows,na),
           Named("next_U")=next_U,
 	        Named("U_hat")=U_hat,
 	        Named("U") = max_with_cond(U_hat,IC_holds),
@@ -268,7 +278,8 @@ DataFrame cpp_capped_rne_iterations(int T,
 	        Named("v2_hat")=v2_hat,
 	        Named("IC_holds")=IC_holds,
 	        Named("q1_hat")=q1_hat,
-	        Named("q2_hat")=q2_hat
+	        Named("q2_hat")=q2_hat,
+	        Named("stringsAsFactors")=false
         );
   		  return res;
       }
@@ -328,7 +339,8 @@ DataFrame cpp_capped_rne_iterations(int T,
 	    Named("v2")=res_v2,
 	    Named("ae")=res_ae,
 	    Named("a1")=res_a1,
-	    Named("a2")=res_a2
+	    Named("a2")=res_a2,
+	    Named("stringsAsFactors")=false
 		);
   return res;
 }
@@ -393,6 +405,8 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
       NumericVector pi1 = li_pi1[row];
       NumericVector pi2 = li_pi2[row];
 
+      int na = pi1.size();
+
       StringVector xd = colnames(trans_mat);
 
       // Note: match returns 1-based index
@@ -406,17 +420,17 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
 
 
       NumericVector U_hat = (1-delta)*(pi1+pi2) +
-        delta* mat_times_vec_rows(trans_mat,next_U, dest_rows);
+        delta* mat_times_vec_rows(trans_mat,next_U, dest_rows,na);
 
 
       //# "q-value" of punishment payoffs
       //q1.hat = (1-delta)*sdf$pi1[[srow]] +
       //  delta * (trans.mat %*% ( (1-rho)*rne$v1[dest.rows] + rho*rne$r1[dest.rows] ))
       NumericVector q1_hat = (1-delta)*pi1 +
-        delta*mat_times_vec_rows(trans_mat,next_v1_r1, dest_rows);
+        delta*mat_times_vec_rows(trans_mat,next_v1_r1, dest_rows,na);
 
       NumericVector q2_hat = (1-delta)*pi2 +
-        delta*mat_times_vec_rows(trans_mat,next_v2_r2, dest_rows);
+        delta*mat_times_vec_rows(trans_mat,next_v2_r2, dest_rows,na);
 
       // # v1.hat is best reply q for player 1
       // # Note player 1 is col player
@@ -439,14 +453,15 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
 
           Named("pi1")=pi1,
           Named("pi2")=pi2,
-          Named("U_cont")=mat_times_vec_rows(trans_mat,next_U, dest_rows),
+          Named("U_cont")=mat_times_vec_rows(trans_mat,next_U, dest_rows,na),
           Named("next_U")=next_U,
 	        Named("U_hat")=U_hat,
 	        Named("v1_hat")=v1_hat,
 	        Named("v2_hat")=v2_hat,
 	        Named("IC_holds")=IC_holds,
 	        Named("q1_hat")=q1_hat,
-	        Named("q2_hat")=q2_hat
+	        Named("q2_hat")=q2_hat,
+	        Named("stringsAsFactors")=false
         );
   		  return res;
       }
@@ -465,17 +480,26 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
 
       // Action lists of the repeated game
       List s_li = static_rep_li[row];
-      DataFrame ae_df = s_li["ae.df"];
-      DataFrame a1_df = s_li["a1.df"];
-      DataFrame a2_df = s_li["a2.df"];
+      NumericMatrix ae_df = s_li["ae.df"];
+      NumericMatrix a1_df = s_li["a1.df"];
+      NumericMatrix a2_df = s_li["a2.df"];
 
-      NumericVector ae_L = ae_df["L"];
-      NumericVector a1_L = a1_df["L"];
-      NumericVector a2_L = a2_df["L"];
+      /*
+      NumericVector ae_L = ae_df[,"L"];
+      NumericVector a1_L = a1_df[,"L"];
+      NumericVector a2_L = a2_df[,"L"];
 
       NumericVector ae_G = ae_df["G"];
       NumericVector a1_c1 = a1_df["c1"];
       NumericVector a2_c2 = a2_df["c2"];
+      */
+      NumericMatrix::Column ae_L = ae_df(_,4);
+      NumericMatrix::Column a1_L = a1_df(_,4);
+      NumericMatrix::Column a2_L = a2_df(_,4);
+
+      NumericMatrix::Column ae_G = ae_df(_,1);
+      NumericMatrix::Column a1_c1 = a1_df(_,2);
+      NumericMatrix::Column a2_c2 = a2_df(_,3);
 
       // Available liquidity after static stage
       double L_av = 1/(1-delta)*(dU-dv1-dv2);
@@ -542,13 +566,19 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
         res_d_a1[row] = a_row[1];
         res_d_a2[row] = a_row[2];
 
+        /*
         IntegerVector ae_a = ae_df[".a"];
         IntegerVector a1_a = a1_df[".a"];
         IntegerVector a2_a = a2_df[".a"];
+        */
+        int ae_a =  (int)(ae_df(ae_row,0)+0.1);
+        int a1_a =  (int)(a1_df(a1_row,0)+0.1);
+        int a2_a =  (int)(a2_df(a2_row,0)+0.1);
 
-        res_s_ae[row] = ae_a[ae_row];
-        res_s_a1[row] = a1_a[a2_row];
-        res_s_a2[row] = a2_a[a2_row];
+
+        res_s_ae[row] = ae_a;
+        res_s_a1[row] = a1_a;
+        res_s_a2[row] = a2_a;
 
       }
     }
@@ -578,7 +608,8 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
 	    Named("s.a2")=res_s_a2,
 	    Named("d.ae")=res_d_ae,
 	    Named("d.a1")=res_d_a1,
-	    Named("d.a2")=res_d_a2
+	    Named("d.a2")=res_d_a2,
+	    Named("stringsAsFactors")=false
 		);
   return res;
 }

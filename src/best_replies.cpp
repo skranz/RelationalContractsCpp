@@ -1,0 +1,136 @@
+#include <Rcpp.h>
+using namespace Rcpp;
+
+// ax specifies on action profile per state
+// returns a vector of ax indices that contains
+// all possible replies for player 1 in all states
+// Note we assume ax is indexed starting with 1
+// [[Rcpp::export]]
+IntegerVector c_pl1_ax_replies(
+  IntegerVector ax, IntegerVector na1, IntegerVector na2
+) {
+  int nx = na1.size();
+  int nres = sum(na1);
+  IntegerVector replies(nres);
+
+  int offset = 0;
+  int ind = 0;
+  // Loop through all states
+  for (int xrow=0; xrow < nx; xrow++) {
+    int a = ax[xrow] - offset-1; // -1 because ax is 1-based
+    int a2 = a % na1[xrow];
+    // Insert all replies of player 1
+    int rep_ind = offset+a2;
+    for (int a1=0; a1<na1[xrow]; a1++) {
+      replies[ind] = rep_ind+1; // +1 because replies are 1-based
+      //Rcout << "xrow " << xrow << " a " << a << " a1 "<<a1 << " a2 " << a2 << std::endl <<
+      //  " offset" << offset << " ind " << ind << " reply "<< rep_ind+1 << std::endl;
+
+      ind++;
+      rep_ind += na2[xrow];
+    }
+    offset += na1[xrow]*na2[xrow];
+  }
+  return replies;
+}
+
+// [[Rcpp::export]]
+IntegerVector c_pl2_ax_replies(
+  IntegerVector ax, IntegerVector na1, IntegerVector na2
+) {
+  int nx = na1.size();
+  int nres = sum(na2);
+  IntegerVector replies(nres);
+
+  int offset = 0;
+  int ind = 0;
+  // Loop through all states
+  for (int xrow=0; xrow < nx; xrow++) {
+    int a = ax[xrow] - offset -1;
+    int a1 = a / na2[xrow];
+
+    // Insert all replies of player 2
+    int rep_ind = offset+a1*na2[xrow];
+    for (int a2=0; a2<na2[xrow]; a2++) {
+      replies[ind] = rep_ind+1;
+      ind++;
+      rep_ind ++;
+    }
+    offset += na1[xrow]*na2[xrow];
+  }
+  return replies;
+}
+
+
+// [[Rcpp::export]]
+NumericVector c_pl1_ax_best_reply_payoffs(
+  NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx
+) {
+
+  int start_ind = 0;
+  NumericVector br_ax(u_ax.size());
+  // Loop through all states
+  double u_br = 0;
+  for (int xrow=0; xrow < nx; xrow++) {
+    // Loop through other player's actions
+    // in current state
+    for (int aj=0; aj<naj[xrow]; aj++) {
+      int ind = start_ind + aj;
+      // Loop through own actions
+      // To find best reply payoff
+      for (int ai=0; ai<nai[xrow]; ai++) {
+        ind = ind + ai*naj[xrow];
+        double u_cur = u_ax[ind];
+        if ((ai==0) | (u_cur > u_br)) {
+          u_br = u_cur;
+        }
+      }
+      // Loop through own actions to
+      // set best reply payoff
+      ind = start_ind + aj;
+      for (int ai=0; ai<nai[xrow]; ai++) {
+        ind = ind + ai*naj[xrow];
+        br_ax[ind] = u_br;
+      }
+    }
+    start_ind = start_ind + naj[xrow]*nai[xrow];
+  }
+  return br_ax;
+}
+
+
+// [[Rcpp::export]]
+NumericVector c_pl2_ax_best_reply_payoffs(
+  NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx
+) {
+
+  int start_ind = 0;
+  NumericVector br_ax(u_ax.size());
+  // Loop through all states
+  double u_br = 0;
+  for (int xrow=0; xrow < nx; xrow++) {
+    // Loop through other player's actions
+    // in current state
+    for (int aj=0; aj<naj[xrow]; aj++) {
+      int ind = start_ind + aj*nai[xrow];
+      // Loop through own actions
+      // To find best reply payoff
+      for (int ai=0; ai<nai[xrow]; ai++) {
+        double u_cur = u_ax[ind];
+        if ((ai==0) | (u_cur > u_br)) {
+          u_br = u_cur;
+        }
+        ind = ind + 1;
+      }
+      // Loop through own actions to
+      // set best reply payoff
+      ind = start_ind + aj*nai[xrow];
+      for (int ai=0; ai<nai[xrow]; ai++) {
+        br_ax[ind] = u_br;
+        ind = ind + 1;
+      }
+    }
+    start_ind = start_ind + naj[xrow]*nai[xrow];
+  }
+  return br_ax;
+}
