@@ -31,6 +31,48 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// c_pl1_best_reply_ax
+IntegerVector c_pl1_best_reply_ax(NumericVector u_ax, IntegerVector ax, IntegerVector na1, IntegerVector na2);
+RcppExport SEXP _RelationalContractsCpp_c_pl1_best_reply_ax(SEXP u_axSEXP, SEXP axSEXP, SEXP na1SEXP, SEXP na2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type u_ax(u_axSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ax(axSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type na1(na1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type na2(na2SEXP);
+    rcpp_result_gen = Rcpp::wrap(c_pl1_best_reply_ax(u_ax, ax, na1, na2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// c_pl2_best_reply_ax
+IntegerVector c_pl2_best_reply_ax(NumericVector u_ax, IntegerVector ax, IntegerVector na1, IntegerVector na2);
+RcppExport SEXP _RelationalContractsCpp_c_pl2_best_reply_ax(SEXP u_axSEXP, SEXP axSEXP, SEXP na1SEXP, SEXP na2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type u_ax(u_axSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ax(axSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type na1(na1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type na2(na2SEXP);
+    rcpp_result_gen = Rcpp::wrap(c_pl2_best_reply_ax(u_ax, ax, na1, na2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// c_pl2_ax_best_replies
+IntegerVector c_pl2_ax_best_replies(NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx);
+RcppExport SEXP _RelationalContractsCpp_c_pl2_ax_best_replies(SEXP u_axSEXP, SEXP naiSEXP, SEXP najSEXP, SEXP nxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type u_ax(u_axSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type nai(naiSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type naj(najSEXP);
+    Rcpp::traits::input_parameter< int >::type nx(nxSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_pl2_ax_best_replies(u_ax, nai, naj, nx));
+    return rcpp_result_gen;
+END_RCPP
+}
 // c_pl1_ax_best_reply_payoffs
 NumericVector c_pl1_ax_best_reply_payoffs(NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx);
 RcppExport SEXP _RelationalContractsCpp_c_pl1_ax_best_reply_payoffs(SEXP u_axSEXP, SEXP naiSEXP, SEXP najSEXP, SEXP nxSEXP) {
@@ -190,6 +232,9 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_RelationalContractsCpp_c_pl1_ax_replies", (DL_FUNC) &_RelationalContractsCpp_c_pl1_ax_replies, 3},
     {"_RelationalContractsCpp_c_pl2_ax_replies", (DL_FUNC) &_RelationalContractsCpp_c_pl2_ax_replies, 3},
+    {"_RelationalContractsCpp_c_pl1_best_reply_ax", (DL_FUNC) &_RelationalContractsCpp_c_pl1_best_reply_ax, 4},
+    {"_RelationalContractsCpp_c_pl2_best_reply_ax", (DL_FUNC) &_RelationalContractsCpp_c_pl2_best_reply_ax, 4},
+    {"_RelationalContractsCpp_c_pl2_ax_best_replies", (DL_FUNC) &_RelationalContractsCpp_c_pl2_ax_best_replies, 4},
     {"_RelationalContractsCpp_c_pl1_ax_best_reply_payoffs", (DL_FUNC) &_RelationalContractsCpp_c_pl1_ax_best_reply_payoffs, 4},
     {"_RelationalContractsCpp_c_pl2_ax_best_reply_payoffs", (DL_FUNC) &_RelationalContractsCpp_c_pl2_ax_best_reply_payoffs, 4},
     {"_RelationalContractsCpp_c_chunk_sums", (DL_FUNC) &_RelationalContractsCpp_c_chunk_sums, 2},

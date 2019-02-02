@@ -9,6 +9,18 @@ c_pl2_ax_replies <- function(ax, na1, na2) {
     .Call(`_RelationalContractsCpp_c_pl2_ax_replies`, ax, na1, na2)
 }
 
+c_pl1_best_reply_ax <- function(u_ax, ax, na1, na2) {
+    .Call(`_RelationalContractsCpp_c_pl1_best_reply_ax`, u_ax, ax, na1, na2)
+}
+
+c_pl2_best_reply_ax <- function(u_ax, ax, na1, na2) {
+    .Call(`_RelationalContractsCpp_c_pl2_best_reply_ax`, u_ax, ax, na1, na2)
+}
+
+c_pl2_ax_best_replies <- function(u_ax, nai, naj, nx) {
+    .Call(`_RelationalContractsCpp_c_pl2_ax_best_replies`, u_ax, nai, naj, nx)
+}
+
 c_pl1_ax_best_reply_payoffs <- function(u_ax, nai, naj, nx) {
     .Call(`_RelationalContractsCpp_c_pl1_ax_best_reply_payoffs`, u_ax, nai, naj, nx)
 }
