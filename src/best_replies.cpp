@@ -61,8 +61,8 @@ IntegerVector c_pl2_ax_replies(
   return replies;
 }
 
-
-// ax specifies on action profile per state
+// u_ax is of length nax
+// ax is of length nx, it specifies on action profile per state
 // changes ax such that player 1 plays a best reply
 // Note we assume ax is indexed starting with 1
 // [[Rcpp::export]]
@@ -82,6 +82,9 @@ IntegerVector c_pl1_best_reply_ax(NumericVector u_ax,
     int rep_ind = offset+a2;
     for (int a1=0; a1<na1[xrow]; a1++) {
       double u_cur = u_ax[rep_ind];
+      //Rcout << "xrow " << xrow << " a " << a << " a1 "<<a1 << " a2 " << a2 << std::endl <<
+      //  " offset " << offset << " rep_ind " << rep_ind << " u_cur " << u_cur << " u_br " << u_br << std::endl;
+
       if ((a1==0) | (u_cur > u_br)) {
         u_br = u_cur;
         br = rep_ind+1; // Add +1 for R index

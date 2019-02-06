@@ -380,6 +380,10 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
   NumericVector res_v1(nx);
   NumericVector res_v2(nx);
 
+  NumericVector res_static_Pi(nx);
+  NumericVector res_static_c1(nx);
+  NumericVector res_static_c2(nx);
+
   IntegerVector res_s_ae(nx);
   IntegerVector res_s_a1(nx);
   IntegerVector res_s_a2(nx);
@@ -387,6 +391,8 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
   IntegerVector res_d_ae(nx);
   IntegerVector res_d_a1(nx);
   IntegerVector res_d_a2(nx);
+
+
 
   // Obtaining function to get action profiles
   //Environment pkg = Environment::namespace_env("RelationalContractsCpp");
@@ -580,6 +586,10 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
         res_s_a1[row] = a1_a;
         res_s_a2[row] = a2_a;
 
+        res_static_Pi[row] = ae_G[ae_row];
+        res_static_c1[row] = a1_c1[a1_row];
+        res_static_c2[row] = a2_c2[a2_row];
+
       }
     }
     if (last_iter) break;
@@ -606,9 +616,12 @@ DataFrame cpp_capped_rne_multistage_iterations(int T,
 	    Named("s.ae")=res_s_ae,
 	    Named("s.a1")=res_s_a1,
 	    Named("s.a2")=res_s_a2,
-	    Named("d.ae")=res_d_ae,
-	    Named("d.a1")=res_d_a1,
-	    Named("d.a2")=res_d_a2,
+	    Named("ae")=res_d_ae,
+	    Named("a1")=res_d_a1,
+	    Named("a2")=res_d_a2,
+	    Named("static.Pi") = res_static_Pi,
+	    Named("static.c1") = res_static_c1,
+	    Named("static.c2") = res_static_c2,
 	    Named("stringsAsFactors")=false
 		);
   return res;
