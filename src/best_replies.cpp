@@ -18,7 +18,7 @@ IntegerVector c_pl1_ax_replies(
   // Loop through all states
   for (int xrow=0; xrow < nx; xrow++) {
     int a = ax[xrow] - offset-1; // -1 because ax is 1-based
-    int a2 = a % na1[xrow];
+    int a2 = a % na2[xrow];
     // Insert all replies of player 1
     int rep_ind = offset+a2;
     for (int a1=0; a1<na1[xrow]; a1++) {
@@ -78,7 +78,7 @@ IntegerVector c_pl1_best_reply_ax(NumericVector u_ax,
   // Loop through all states
   for (int xrow=0; xrow < nx; xrow++) {
     int a = ax[xrow] - offset-1; // -1 because ax is 1-based
-    int a2 = a % na1[xrow];
+    int a2 = a % na2[xrow];
     int rep_ind = offset+a2;
     for (int a1=0; a1<na1[xrow]; a1++) {
       double u_cur = u_ax[rep_ind];
@@ -187,18 +187,18 @@ NumericVector c_pl1_ax_best_reply_payoffs(
       // Loop through own actions
       // To find best reply payoff
       for (int ai=0; ai<nai[xrow]; ai++) {
-        ind = ind + ai*naj[xrow];
         double u_cur = u_ax[ind];
         if ((ai==0) | (u_cur > u_br)) {
           u_br = u_cur;
         }
+        ind = ind+ naj[xrow];
       }
       // Loop through own actions to
       // set best reply payoff
       ind = start_ind + aj;
       for (int ai=0; ai<nai[xrow]; ai++) {
-        ind = ind + ai*naj[xrow];
         br_ax[ind] = u_br;
+        ind = ind+naj[xrow];
       }
     }
     start_ind = start_ind + naj[xrow]*nai[xrow];
