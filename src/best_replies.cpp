@@ -1,7 +1,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// ax specifies on action profile per state
+// ax specifies one action profile per state
 // returns a vector of ax indices that contains
 // all possible replies for player 1 in all states
 // Note we assume ax is indexed starting with 1
@@ -22,6 +22,7 @@ IntegerVector c_pl1_ax_replies(
     // Insert all replies of player 1
     int rep_ind = offset+a2;
     for (int a1=0; a1<na1[xrow]; a1++) {
+      if ((ind >= replies.size()) | (ind < 0)) stop("bounds error in c_pl1_ax_replies");
       replies[ind] = rep_ind+1; // +1 because replies are 1-based
       //Rcout << "xrow " << xrow << " a " << a << " a1 "<<a1 << " a2 " << a2 << std::endl <<
       //  " offset" << offset << " ind " << ind << " reply "<< rep_ind+1 << std::endl;
@@ -52,6 +53,7 @@ IntegerVector c_pl2_ax_replies(
     // Insert all replies of player 2
     int rep_ind = offset+a1*na2[xrow];
     for (int a2=0; a2<na2[xrow]; a2++) {
+      if ((ind >= replies.size()) | (ind < 0)) stop("bounds error in c_pl2_ax_replies");
       replies[ind] = rep_ind+1;
       ind++;
       rep_ind ++;
@@ -62,7 +64,7 @@ IntegerVector c_pl2_ax_replies(
 }
 
 // u_ax is of length nax
-// ax is of length nx, it specifies on action profile per state
+// ax is of length nx, it specifies one action profile per state
 // changes ax such that player 1 plays a best reply
 // Note we assume ax is indexed starting with 1
 // [[Rcpp::export]]
@@ -130,7 +132,7 @@ IntegerVector c_pl2_best_reply_ax(NumericVector u_ax,
 }
 
 
-
+/*
 // [[Rcpp::export]]
 IntegerVector c_pl2_ax_best_replies(
   NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx
@@ -160,6 +162,8 @@ IntegerVector c_pl2_ax_best_replies(
       // set best reply payoff
       ind = start_ind + aj*nai[xrow];
       for (int ai=0; ai<nai[xrow]; ai++) {
+        if ((ind >= br_ax.size()) | ind < 0) stop("bounds error in c_pl2_ax_best_replies");
+
         br_ax[ind] = br;
         ind = ind + 1;
       }
@@ -168,8 +172,12 @@ IntegerVector c_pl2_ax_best_replies(
   }
   return br_ax;
 }
+*/
 
-
+// u_ax are payoffs of length nax
+// returns a numeric vector of length nax
+// that contains for every pair of state and action profile
+// player 1's best reply payoff
 // [[Rcpp::export]]
 NumericVector c_pl1_ax_best_reply_payoffs(
   NumericVector u_ax, IntegerVector nai, IntegerVector naj, int nx
@@ -197,6 +205,7 @@ NumericVector c_pl1_ax_best_reply_payoffs(
       // set best reply payoff
       ind = start_ind + aj;
       for (int ai=0; ai<nai[xrow]; ai++) {
+        if ((ind >= br_ax.size()) | (ind < 0)) stop("bounds error in c_pl1_ax_best_reply_payoffs");
         br_ax[ind] = u_br;
         ind = ind+naj[xrow];
       }
@@ -234,6 +243,8 @@ NumericVector c_pl2_ax_best_reply_payoffs(
       // set best reply payoff
       ind = start_ind + aj*nai[xrow];
       for (int ai=0; ai<nai[xrow]; ai++) {
+        if ( (ind >= br_ax.size()) | (ind < 0)) stop("bounds error in c_pl2_ax_best_reply_payoffs");
+
         br_ax[ind] = u_br;
         ind = ind + 1;
       }
